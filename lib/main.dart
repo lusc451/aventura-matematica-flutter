@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+// teste
 void main() {
   runApp(const NumerosMagicosApp());
 }
