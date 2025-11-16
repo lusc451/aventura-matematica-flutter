@@ -1,15 +1,6 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
-import '../game/game_screen.dart';
-
-class Realm {
-  final String name;
-  final String image;
-  final String description;
-  final Color color;
-
-  Realm(this.name, this.image, this.description, this.color);
-}
+import 'package:aventura_matematica/presentation/screens/game/game_screen.dart';
+import 'package:aventura_matematica/presentation/widgets/magic_particles.dart';
 
 class RealmsScreen extends StatelessWidget {
   const RealmsScreen({super.key});
@@ -17,137 +8,86 @@ class RealmsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final realms = [
-      Realm(
-        "Reino das Chamas",
-        "assets/images/fire-realm.png",
-        "Desafios de adição com lava e brasas!",
-        Colors.deepOrange,
-      ),
-      Realm(
-        "Reino das Sombras",
-        "assets/images/shadow-realm.png",
-        "Subtrações misteriosas na floresta escura.",
-        Colors.indigo,
-      ),
-      Realm(
-        "Reino do Gelo",
-        "assets/images/ice-realm.png",
-        "Domine as multiplicações entre cristais gelados!",
-        Colors.lightBlue,
-      ),
-      Realm(
-        "Reino dos Ventos",
-        "assets/images/wind-realm.png",
-        "Misture operações em meio a nuvens e trovões!",
-        Colors.teal,
-      ),
+      {
+        'name': 'Reino das Chamas',
+        'description': 'Desafios de adição com lava e brasas!',
+        'image': 'assets/images/fire-realm.png',
+      },
+      {
+        'name': 'Reino das Sombras',
+        'description': 'Subtrações misteriosas na floresta escura.',
+        'image': 'assets/images/shadow-realm.png',
+      },
+      {
+        'name': 'Reino do Gelo',
+        'description': 'Domine as multiplicações entre cristais gelados!',
+        'image': 'assets/images/ice-realm.png',
+      },
+      {
+        'name': 'Reino dos Ventos',
+        'description': 'Misture operações em meio a nuvens e trovões!',
+        'image': 'assets/images/wind-realm.png',
+      },
     ];
 
     return Scaffold(
       backgroundColor: const Color(0xFF311B92),
       appBar: AppBar(
-        title: const Text("Escolha seu Reino"),
+        title: const Text(
+          'Escolha seu Reino',
+          style: TextStyle(
+            fontFamily: 'MedievalSharp',
+            fontWeight: FontWeight.bold,
+            fontSize: 22,
+            color: Colors.white, // título branco
+          ),
+        ),
+        iconTheme: const IconThemeData(color: Colors.white), // ícone branco
         backgroundColor: const Color(0xFF4527A0),
-        foregroundColor: Colors.white,
+        elevation: 4,
         centerTitle: true,
       ),
       body: Stack(
         children: [
-          const MagicParticles(),
-          GridView.builder(
-            padding: const EdgeInsets.all(20),
-            itemCount: realms.length,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 0.8,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-            ),
-            itemBuilder: (context, index) {
-              final realm = realms[index];
-              return GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => GameScreen(realmName: realm.name),
-                    ),
-                  );
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: realm.color.withOpacity(0.5),
-                        blurRadius: 15,
-                        spreadRadius: 2,
-                      ),
-                    ],
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      Image.asset(
-                        realm.image,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return const Center(
-                            child: Icon(Icons.error, color: Colors.white),
+          const MagicParticles(count: 25),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 20),
+            child: GridView.builder(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: 24,
+                crossAxisSpacing: 16,
+                childAspectRatio: 0.68, // 🔹 torna os cards mais altos e amplos
+              ),
+              itemCount: realms.length,
+              itemBuilder: (context, index) {
+                final realm = realms[index];
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      PageRouteBuilder(
+                        transitionDuration: const Duration(milliseconds: 800),
+                        pageBuilder: (_, __, ___) =>
+                            GameScreen(realmName: realm['name']!),
+                        transitionsBuilder: (_, animation, __, child) {
+                          final fade = CurvedAnimation(
+                            parent: animation,
+                            curve: Curves.easeInOut,
                           );
+                          return FadeTransition(opacity: fade, child: child);
                         },
                       ),
-                      Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              realm.color.withOpacity(0.7),
-                              Colors.black.withOpacity(0.3),
-                            ],
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                          ),
-                        ),
-                      ),
-                      Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              realm.name,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                shadows: [
-                                  Shadow(color: Colors.black54, blurRadius: 8),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                              ),
-                              child: Text(
-                                realm.description,
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  color: Colors.white70,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                    );
+                  },
+                  child: RealmCard(
+                    name: realm['name']!,
+                    description: realm['description']!,
+                    imagePath: realm['image']!,
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
         ],
       ),
@@ -155,67 +95,85 @@ class RealmsScreen extends StatelessWidget {
   }
 }
 
-// Efeito de partículas mágicas
-class MagicParticles extends StatefulWidget {
-  const MagicParticles({super.key});
+class RealmCard extends StatelessWidget {
+  final String name;
+  final String description;
+  final String imagePath;
 
-  @override
-  State<MagicParticles> createState() => _MagicParticlesState();
-}
-
-class _MagicParticlesState extends State<MagicParticles>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  final List<Offset> _particles = List.generate(
-    15,
-    (_) => Offset(Random().nextDouble(), Random().nextDouble()),
-  );
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 10),
-    )..repeat();
-  }
+  const RealmCard({
+    super.key,
+    required this.name,
+    required this.description,
+    required this.imagePath,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (_, __) {
-        return CustomPaint(
-          painter: _MagicPainter(_particles, _controller.value),
-          child: Container(),
-        );
-      },
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(26),
+        image: DecorationImage(
+          image: AssetImage(imagePath),
+          fit: BoxFit.cover,
+          colorFilter: ColorFilter.mode(
+            Colors.black.withOpacity(0.35),
+            BlendMode.darken,
+          ),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.6),
+            blurRadius: 12,
+            offset: const Offset(3, 6),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Align(
+          alignment: Alignment.bottomLeft,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                name,
+                style: const TextStyle(
+                  fontFamily: 'MedievalSharp',
+                  fontSize: 22, // 🔹 aumentou
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black,
+                      offset: Offset(1, 1),
+                      blurRadius: 4,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                description,
+                style: const TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 15, // 🔹 mais legível
+                  color: Colors.white70,
+                  height: 1.4,
+                  fontWeight: FontWeight.w500,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black,
+                      offset: Offset(0.5, 0.5),
+                      blurRadius: 3,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-}
-
-class _MagicPainter extends CustomPainter {
-  final List<Offset> particles;
-  final double progress;
-
-  _MagicPainter(this.particles, this.progress);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = Colors.white.withOpacity(0.6);
-    for (var p in particles) {
-      final dx = (p.dx * size.width + sin(progress * 2 * pi) * 10);
-      final dy = (p.dy * size.height + cos(progress * 2 * pi) * 10);
-      canvas.drawCircle(Offset(dx, dy), 2.5, paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _MagicPainter oldDelegate) => true;
 }

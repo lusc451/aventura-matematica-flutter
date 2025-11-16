@@ -61,9 +61,14 @@ dev_dependencies:
 # The following section is specific to Flutter packages.
 flutter:
   uses-material-design: true
-
   assets:
     - assets/images/
+
+  fonts:
+    - family: MedievalSharp
+      fonts:
+        - asset: assets/fonts/MedievalSharp-Regular.ttf
+
 
   # To add assets to your application, add an assets section, like this:
   # assets:
@@ -101,4 +106,4 @@ flutter_launcher_icons:
   ios: true
   image_path: "assets/images/mago_icon.png"
   adaptive_icon_background: "#311B92"
-  adaptive_icon_foreground: "assets/images/mago_icon.png"
+  adaptive_icon_foreground: "assets/images/mago_icon_pixel.png"

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'presentation/screens/home/home_screen.dart';
+import 'package:aventura_matematica/presentation/screens/home/splash_screen.dart';
 
 void main() {
   runApp(const AventuraMatematicaApp());
@@ -11,14 +11,14 @@ class AventuraMatematicaApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Aventura Matemática',
       debugShowCheckedModeBanner: false,
+      title: 'Aventura Matemática',
       theme: ThemeData(
-        colorSchemeSeed: Colors.deepPurple,
-        useMaterial3: true,
-        fontFamily: 'Poppins',
+        primaryColor: const Color(0xFF311B92),
+        scaffoldBackgroundColor: const Color(0xFF311B92),
+        fontFamily: 'MedievalSharp',
       ),
-      home: const HomeScreen(),
+      home: const SplashScreen(), // inicia pela splash
     );
   }
 }
