@@ -1,5 +1,12 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:aventura_matematica/presentation/screens/game/SpellAnimation.dart';
+
+import 'package:aventura_matematica/presentation/screens/game/wizard_idle_animation.dart';
+import 'package:aventura_matematica/presentation/screens/game/wizard_attack_animation.dart';
+import 'package:aventura_matematica/presentation/screens/game/wizard_hit_animation.dart';
+
+enum WizardState { idle, attack, hit }
 
 class GameScreen extends StatefulWidget {
   const GameScreen({super.key});
@@ -14,6 +21,7 @@ class _GameScreenState extends State<GameScreen> {
   late int answer;
   List<int> options = [];
   String feedbackMessage = '';
+  WizardState wizardState = WizardState.idle;
 
   @override
   void initState() {
@@ -39,13 +47,44 @@ class _GameScreenState extends State<GameScreen> {
 
   void _checkAnswer(int selected) {
     setState(() {
-      feedbackMessage =
-          selected == answer ? '✨ Acertou! ✨' : '💥 Errou! 💥';
+      if (selected == answer) {
+        feedbackMessage = '✨ Acertou! ✨';
+        wizardState = WizardState.attack;
+      } else {
+        feedbackMessage = '💥 Errou! 💥';
+        wizardState = WizardState.hit;
+      }
 
       Future.delayed(const Duration(seconds: 1), () {
-        setState(() => _generateQuestion());
+        setState(() {
+          wizardState = WizardState.idle;
+          _generateQuestion();
+        });
       });
     });
+  }
+
+  Widget _buildWizard() {
+    switch (wizardState) {
+      case WizardState.attack:
+        return WizardAttackAnimation(
+          size: 180,
+          onComplete: () {
+            setState(() => wizardState = WizardState.idle);
+          },
+        );
+
+      case WizardState.hit:
+        return WizardHitAnimation(
+          size: 180,
+          onComplete: () {
+            setState(() => wizardState = WizardState.idle);
+          },
+        );
+
+      default:
+        return WizardIdleAnimation(size: 180);
+    }
   }
 
   @override
@@ -53,28 +92,23 @@ class _GameScreenState extends State<GameScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // 🔥  Fundo mágico (imagem reino de fogo)
           Positioned.fill(
             child: Image.asset(
               'assets/images/reino-fogo.jpg',
               fit: BoxFit.cover,
             ),
           ),
-
-          // Camada escura para legibilidade
           Positioned.fill(
             child: Container(
               color: Colors.black.withOpacity(0.35),
             ),
           ),
-
           SafeArea(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const SizedBox(height: 20),
 
-                // 🟥 VILÃO – Quadrado mágico estilizado
                 Column(
                   children: [
                     Container(
@@ -119,7 +153,6 @@ class _GameScreenState extends State<GameScreen> {
                   ],
                 ),
 
-                // ✨ FEEDBACK ANIMADO
                 AnimatedOpacity(
                   duration: const Duration(milliseconds: 300),
                   opacity: feedbackMessage.isEmpty ? 0 : 1,
@@ -129,17 +162,10 @@ class _GameScreenState extends State<GameScreen> {
                       fontSize: 28,
                       color: Colors.yellowAccent,
                       fontWeight: FontWeight.bold,
-                      shadows: [
-                        Shadow(
-                          blurRadius: 15,
-                          color: Colors.orange,
-                        )
-                      ],
                     ),
                   ),
                 ),
 
-                // 🟢 FEITIÇOS (Gifs animados com números)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: options.map((opt) {
@@ -148,24 +174,13 @@ class _GameScreenState extends State<GameScreen> {
                       child: Stack(
                         alignment: Alignment.center,
                         children: [
-                          // 🔮 GIF do Feitiço
-                          Image.asset(
-                            'assets/images/fireball.png',
-                            height: 110,
-                          ),
-                          // Número acima da energia
+                          SpellAnimation(size: 110),
                           Text(
                             '$opt',
                             style: const TextStyle(
-                              fontSize: 30,
+                              fontSize: 32,
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
-                              shadows: [
-                                Shadow(
-                                  blurRadius: 20,
-                                  color: Colors.black,
-                                )
-                              ],
                             ),
                           ),
                         ],
@@ -174,24 +189,9 @@ class _GameScreenState extends State<GameScreen> {
                   }).toList(),
                 ),
 
-                // 🧙‍♂️ MAGO HEROI
                 Padding(
                   padding: const EdgeInsets.only(bottom: 20),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.blueAccent.withOpacity(0.6),
-                          blurRadius: 20,
-                          spreadRadius: 4,
-                        ),
-                      ],
-                    ),
-                    child: Image.asset(
-                      'assets/images/mago.jpg',
-                      height: 150,
-                    ),
-                  ),
+                  child: _buildWizard(),
                 ),
               ],
             ),
