@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 
 class GameScreen extends StatefulWidget {
@@ -10,28 +11,53 @@ class GameScreen extends StatefulWidget {
 }
 
 class _GameScreenState extends State<GameScreen> {
-  String get operationType {
-    switch (widget.realmName) {
-      case 'Reino das Chamas':
-        return 'Adição';
-      case 'Reino das Sombras':
-        return 'Subtração';
-      case 'Reino do Gelo':
-        return 'Multiplicação';
-      case 'Reino dos Ventos':
-        return 'Misto';
-      default:
-        return 'Operação Desconhecida';
+  late int a;
+  late int b;
+  late int result;
+  late int answer;
+  List<int> options = [];
+  String feedbackMessage = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _generateQuestion();
+  }
+
+  void _generateQuestion() {
+    final rand = Random();
+    a = rand.nextInt(9) + 1;
+    b = rand.nextInt(9) + 1;
+    result = a + b;
+
+    answer = result;
+    options = [answer];
+    while (options.length < 3) {
+      int opt = rand.nextInt(18) + 2;
+      if (!options.contains(opt)) options.add(opt);
     }
+    options.shuffle();
+
+    feedbackMessage = '';
+  }
+
+  void _checkAnswer(int selected) {
+    setState(() {
+      if (selected == result) {
+        feedbackMessage = '✨ Acertou!';
+      } else {
+        feedbackMessage = '❌ Tente novamente!';
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF4527A0),
+      backgroundColor: const Color(0xFF311B92),
       appBar: AppBar(
         title: Text(widget.realmName),
-        backgroundColor: const Color(0xFF311B92),
+        backgroundColor: const Color(0xFF4527A0),
         foregroundColor: Colors.white,
       ),
       body: Center(
@@ -39,18 +65,40 @@ class _GameScreenState extends State<GameScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              operationType,
+              '$a + $b = ?',
               style: const TextStyle(
-                fontSize: 26,
-                color: Colors.amberAccent,
+                fontSize: 32,
                 fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
             ),
-            const SizedBox(height: 16),
-            const Text(
-              'Em breve, os desafios mágicos deste reino começarão!',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white70, fontSize: 16),
+            const SizedBox(height: 30),
+            Wrap(
+              spacing: 12,
+              children: options
+                  .map(
+                    (opt) => ElevatedButton(
+                      onPressed: () => _checkAnswer(opt),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.purpleAccent,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 16,
+                        ),
+                      ),
+                      child: Text(
+                        opt.toString(),
+                        style: const TextStyle(fontSize: 20),
+                      ),
+                    ),
+                  )
+                  .toList(),
+            ),
+            const SizedBox(height: 30),
+            Text(
+              feedbackMessage,
+              style: const TextStyle(fontSize: 20, color: Colors.white),
             ),
           ],
         ),
