@@ -30,7 +30,7 @@ class _WizardIdleAnimationState extends State<WizardIdleAnimation> {
       image,
       SpriteAnimationData.sequenced(
         amount: 8,                      // número de frames
-        textureSize: Vector2(96, 96),   // tamanho DO FRAME
+        textureSize: Vector2(150, 150),   // tamanho DO FRAME
         stepTime: 0.1,                  // velocidade do idle
         loop: true,
       ),

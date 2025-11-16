@@ -39,7 +39,7 @@ class _WizardHitAnimationState extends State<WizardHitAnimation>
       image,
       SpriteAnimationData.sequenced(
         amount: 8,
-        textureSize: Vector2(192, 192), // <-- tamanho correto
+        textureSize: Vector2(150, 150), // <-- tamanho correto
         stepTime: 0.07, // velocidade do hit
         loop: false,    // só uma vez
       ),

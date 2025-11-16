@@ -64,6 +64,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
+    - assets/images/
     - assets/images/mago.jpg
     - assets/images/reino-fogo.jpg
     - assets/images/fireball.png
@@ -72,9 +73,6 @@ flutter:
     - assets/images/FireWizard/Attack.png
     - assets/images/FireWizard/Hit.png
 
-
-  assets:
-    - assets/images/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

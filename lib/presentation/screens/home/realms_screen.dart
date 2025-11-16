@@ -2,14 +2,24 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import '../game/game_screen.dart';
 
+enum MathOperation { addition, subtraction, multiplication, mix }
+
 class Realm {
   final String name;
   final String image;
   final String description;
   final Color color;
+  final MathOperation operation;
 
-  Realm(this.name, this.image, this.description, this.color);
+  Realm(
+    this.name,
+    this.image,
+    this.description,
+    this.color,
+    this.operation,
+  );
 }
+
 
 class RealmsScreen extends StatelessWidget {
   const RealmsScreen({super.key});
@@ -22,24 +32,28 @@ class RealmsScreen extends StatelessWidget {
         "assets/images/fire-realm.png",
         "Desafios de adição com lava e brasas!",
         Colors.deepOrange,
+        MathOperation.addition,
       ),
       Realm(
         "Reino das Sombras",
         "assets/images/shadow-realm.png",
         "Subtrações misteriosas na floresta escura.",
         Colors.indigo,
+        MathOperation.subtraction,
       ),
       Realm(
         "Reino do Gelo",
         "assets/images/ice-realm.png",
-        "Domine as multiplicações entre cristais gelados!",
+        "Domine multiplicações entre cristais gelados!",
         Colors.lightBlue,
+        MathOperation.multiplication,
       ),
       Realm(
         "Reino dos Ventos",
         "assets/images/wind-realm.png",
         "Misture operações em meio a nuvens e trovões!",
         Colors.teal,
+        MathOperation.mix,
       ),
     ];
 
@@ -66,14 +80,15 @@ class RealmsScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               final realm = realms[index];
               return GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => GameScreen(realmName: realm.name),
-                    ),
-                  );
-                },
+               onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => GameScreen(realm: realm),
+                  ),
+                );
+              },
+
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),

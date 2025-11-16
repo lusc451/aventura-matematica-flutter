@@ -39,7 +39,7 @@ class _WizardAttackAnimationState extends State<WizardAttackAnimation>
       image,
       SpriteAnimationData.sequenced(
         amount: 8,
-        textureSize: Vector2(192, 192), // tamanho REAL
+        textureSize: Vector2(150, 150), // tamanho REAL
         stepTime: 0.07,
         loop: false,
       ),
