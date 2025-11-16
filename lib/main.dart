@@ -1,28 +1,23 @@
 import 'package:flutter/material.dart';
-import 'presentation/screens/home/home_screen.dart';
-import 'presentation/screens/game/game_screen.dart';
+import 'presentation/screens/home/splash_screen.dart';
 
 void main() {
-  runApp(const NumerosMagicosApp());
+  runApp(const AventuraMatematica());
 }
 
-class NumerosMagicosApp extends StatelessWidget {
-  const NumerosMagicosApp({super.key});
+class AventuraMatematica extends StatelessWidget {
+  const AventuraMatematica({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Números Mágicos',
+      title: 'Aventura Matemática',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      initialRoute: '/',
-      routes: {
-        '/': (context) => const HomeScreen(),
-        '/game': (context) => const GameScreen(),
-      },
+      home: const SplashScreen(),
     );
   }
 }
