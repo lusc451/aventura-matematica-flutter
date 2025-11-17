@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'home_screen.dart';
+import 'dart:async';
+import 'home/home_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -11,6 +12,7 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
+  late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
@@ -19,9 +21,15 @@ class _SplashScreenState extends State<SplashScreen>
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
-    )..forward();
+    );
+    _fadeAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    );
 
-    Future.delayed(const Duration(seconds: 3), () {
+    _controller.forward();
+
+    Timer(const Duration(seconds: 3), () {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const HomeScreen()),
@@ -40,21 +48,36 @@ class _SplashScreenState extends State<SplashScreen>
     return Scaffold(
       backgroundColor: const Color(0xFF311B92),
       body: FadeTransition(
-        opacity: _controller,
+        opacity: _fadeAnimation,
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset('assets/images/mago.png', height: 160),
+              ShaderMask(
+                shaderCallback: (bounds) => const LinearGradient(
+                  colors: [Colors.amberAccent, Colors.deepPurpleAccent],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ).createShader(bounds),
+                blendMode: BlendMode.srcATop,
+                child: Image.asset(
+                  'assets/images/mago.png',
+                  height: 160,
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Icon(Icons.error, color: Colors.red, size: 80);
+                  },
+                ),
+              ),
               const SizedBox(height: 20),
               const Text(
                 'NÚMEROS MÁGICOS',
                 style: TextStyle(
                   fontSize: 32,
-                  color: Colors.white,
                   fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
+              const SizedBox(height: 10),
               const Text(
                 'Aventura da Matemática',
                 style: TextStyle(
@@ -63,7 +86,7 @@ class _SplashScreenState extends State<SplashScreen>
                   fontWeight: FontWeight.w400,
                 ),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 30),
               const CircularProgressIndicator(color: Colors.amberAccent),
             ],
           ),

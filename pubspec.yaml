@@ -34,14 +34,17 @@ dependencies:
   flutter_bloc: ^8.1.5
   sqflite: ^2.3.0
   path: ^1.9.0
-  flame: ^1.14.0
   spritewidget: 2.0.1
   audioplayers: ^6.0.0
   lottie: ^3.1.0
+  flame: ^1.17.0
+
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  flutter_launcher_icons: ^0.14.4
+
 
 dev_dependencies:
   flutter_test:
@@ -59,10 +62,17 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-  # The following line ensures that the Material Icons font is
-  # included with your application, so that you can use the icons in
-  # the material Icons class.
   uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/images/mago.jpg
+    - assets/images/reino-fogo.jpg
+    - assets/images/fireball.png
+    - assets/images/FireCast_96x96.png
+    - assets/images/FireWizard/Idle.png
+    - assets/images/FireWizard/Attack.png
+    - assets/images/FireWizard/Hit.png
+
 
   # To add assets to your application, add an assets section, like this:
   # assets:
@@ -94,5 +104,10 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
-assets:
-  - assets/images/
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/mago_icon.png"
+  adaptive_icon_background: "#311B92"
+  adaptive_icon_foreground: "assets/images/mago_icon.png"
