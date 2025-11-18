@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../game/game_screen.dart';
+import '../../widgets/magic_particles.dart'; // ✅ Import corrigido
 
 enum MathOperation { addition, subtraction, multiplication, mix }
 
@@ -61,107 +62,132 @@ class RealmsScreen extends StatelessWidget {
             color: Colors.white, // título branco
           ),
         ),
-        iconTheme: const IconThemeData(color: Colors.white), // ícone branco
+        iconTheme: const IconThemeData(color: Colors.white), // seta branca
         backgroundColor: const Color(0xFF4527A0),
         elevation: 4,
         centerTitle: true,
       ),
       body: Stack(
         children: [
-          const MagicParticles(),
-          GridView.builder(
-            padding: const EdgeInsets.all(20),
-            itemCount: realms.length,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 0.8,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-            ),
-            itemBuilder: (context, index) {
-              final realm = realms[index];
-              return GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => GameScreen(realm: realm)),
-                  );
-                },
-
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: realm.color.withOpacity(0.5),
-                        blurRadius: 15,
-                        spreadRadius: 2,
-                      ),
-                    ],
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      Image.asset(
-                        realm.image,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return const Center(
-                            child: Icon(Icons.error, color: Colors.white),
+          const MagicParticles(count: 25), // ✨ fundo mágico
+          Padding(
+            padding: const EdgeInsets.all(18),
+            child: GridView.builder(
+              itemCount: realms.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                childAspectRatio: 0.68, // 🔹 cards maiores
+                crossAxisSpacing: 18,
+                mainAxisSpacing: 20,
+              ),
+              itemBuilder: (context, index) {
+                final realm = realms[index];
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      PageRouteBuilder(
+                        transitionDuration: const Duration(milliseconds: 900),
+                        pageBuilder: (_, __, ___) => GameScreen(realm: realm),
+                        transitionsBuilder: (_, animation, __, child) {
+                          final fade = CurvedAnimation(
+                            parent: animation,
+                            curve: Curves.easeInOut,
                           );
+                          return FadeTransition(opacity: fade, child: child);
                         },
                       ),
-                      Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              realm.color.withOpacity(0.7),
-                              Colors.black.withOpacity(0.3),
-                            ],
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                          ),
-                        ),
-                      ),
-                      Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              realm.name,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                shadows: [
-                                  Shadow(color: Colors.black54, blurRadius: 8),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                              ),
-                              child: Text(
-                                realm.description,
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  color: Colors.white70,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                    );
+                  },
+                  child: RealmCard(realm: realm),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class RealmCard extends StatelessWidget {
+  final Realm realm;
+  const RealmCard({super.key, required this.realm});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: realm.color.withOpacity(0.5),
+            blurRadius: 12,
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          // 🔹 Imagem de fundo do reino
+          Image.asset(
+            realm.image,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return const Center(
+                child: Icon(Icons.error, color: Colors.white),
               );
             },
+          ),
+
+          // 🔹 Gradiente de sobreposição
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.black.withOpacity(0.6),
+                  realm.color.withOpacity(0.25),
+                ],
+                begin: Alignment.bottomCenter,
+                end: Alignment.topCenter,
+              ),
+            ),
+          ),
+
+          // 🔹 Conteúdo textual do card
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  realm.name,
+                  textAlign: TextAlign.start,
+                  style: const TextStyle(
+                    fontFamily: 'MedievalSharp',
+                    fontSize: 21,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    shadows: [Shadow(color: Colors.black87, blurRadius: 6)],
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  realm.description,
+                  textAlign: TextAlign.start,
+                  style: const TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 14.5,
+                    color: Colors.white70,
+                    height: 1.3,
+                    shadows: [Shadow(color: Colors.black54, blurRadius: 3)],
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),

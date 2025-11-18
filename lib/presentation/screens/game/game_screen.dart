@@ -118,7 +118,7 @@ class _GameScreenState extends State<GameScreen> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-          )
+          ),
         ],
       ),
     );
@@ -170,39 +170,118 @@ class _GameScreenState extends State<GameScreen> {
     });
   }
 
-  // ➤ Diálogo final
+  // ➤ Diálogo final aprimorado e centralizado
   void _showEndDialog() {
     bool venceu = enemyHp == 0;
 
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => AlertDialog(
-        backgroundColor: Colors.black87,
-        title: Text(
-          venceu ? "🏆 Vitória!" : "💀 Derrota!",
-          style: const TextStyle(color: Colors.white),
-        ),
-        content: Text(
-          venceu
-              ? "Você derrotou o inimigo!"
-              : "O mago ficou sem energia!",
-          style: const TextStyle(color: Colors.white70),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              setState(() {
-                playerHp = playerMaxHp;
-                enemyHp = enemyMaxHp;
-                wizardState = WizardState.idle;
-                _generateQuestion();
-              });
-            },
-            child: const Text("Jogar de novo", style: TextStyle(color: Colors.white)),
+      builder: (_) => Center(
+        // 🔹 Centraliza verticalmente
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 320),
+          child: AlertDialog(
+            backgroundColor: Colors.deepPurple.shade900.withOpacity(0.9),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+            ),
+            title: Center(
+              child: Text(
+                venceu ? "🏆 Vitória!" : "💀 Derrota!",
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontFamily: 'MedievalSharp',
+                  fontWeight: FontWeight.bold,
+                  fontSize: 26,
+                ),
+              ),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 20,
+              vertical: 18,
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  venceu
+                      ? "Você derrotou o inimigo e conquistou este reino!"
+                      : "O mago ficou sem energia... tente novamente!",
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 17,
+                    height: 1.5,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+                const SizedBox(height: 28),
+
+                // 🔹 Botões centralizados
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.pinkAccent,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 36,
+                          vertical: 14,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        setState(() {
+                          playerHp = playerMaxHp;
+                          enemyHp = enemyMaxHp;
+                          wizardState = WizardState.idle;
+                          _generateQuestion();
+                        });
+                      },
+                      child: const Text(
+                        "Jogar Novamente",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.deepPurpleAccent,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 36,
+                          vertical: 14,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context); // fecha o diálogo
+                        Navigator.pop(context); // volta para RealmsScreen
+                      },
+                      child: const Text(
+                        "Voltar aos Reinos",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -223,7 +302,13 @@ class _GameScreenState extends State<GameScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Derrote seu inimigo!"),
+        title: const Text(
+          "Derrote seu inimigo!",
+          style: TextStyle(
+            fontFamily: 'MedievalSharp',
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         backgroundColor: const Color(0xFF4527A0),
         foregroundColor: Colors.white,
         centerTitle: true,
@@ -232,10 +317,7 @@ class _GameScreenState extends State<GameScreen> {
         children: [
           // 🔥 Fundo dinâmico
           Positioned.fill(
-            child: Image.asset(
-              widget.realm.image,
-              fit: BoxFit.cover,
-            ),
+            child: Image.asset(widget.realm.image, fit: BoxFit.cover),
           ),
 
           // Escurecer fundo
@@ -260,10 +342,7 @@ class _GameScreenState extends State<GameScreen> {
                       height: 120,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: widget.realm.color,
-                          width: 4,
-                        ),
+                        border: Border.all(color: widget.realm.color, width: 4),
                         gradient: LinearGradient(
                           colors: [
                             widget.realm.color.withOpacity(0.8),
@@ -275,7 +354,7 @@ class _GameScreenState extends State<GameScreen> {
                             color: widget.realm.color.withOpacity(0.8),
                             blurRadius: 25,
                             spreadRadius: 5,
-                          )
+                          ),
                         ],
                       ),
                     ),
