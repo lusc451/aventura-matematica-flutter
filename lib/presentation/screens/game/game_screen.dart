@@ -1,39 +1,39 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:aventura_matematica/presentation/screens/home/realms_screen.dart';
-
-import 'package:aventura_matematica/presentation/screens/game/SpellAnimation.dart';
-import 'package:aventura_matematica/presentation/screens/game/wizard_idle_animation.dart';
-import 'package:aventura_matematica/presentation/screens/game/wizard_attack_animation.dart';
-import 'package:aventura_matematica/presentation/screens/game/wizard_hit_animation.dart';
+import 'package:aventura_matematica/data/database/progress_db.dart';
+import 'SpellAnimation.dart';
+import 'wizard_idle_animation.dart';
+import 'wizard_attack_animation.dart';
+import 'wizard_hit_animation.dart';
 
 enum WizardState { idle, attack, hit }
 
 class GameScreen extends StatefulWidget {
   final Realm realm;
+  final String difficulty;
 
-  const GameScreen({super.key, required this.realm});
+  const GameScreen({super.key, required this.realm, required this.difficulty});
 
   @override
   State<GameScreen> createState() => _GameScreenState();
 }
 
 class _GameScreenState extends State<GameScreen> {
-  // ➤ Vida
+  // Vida
   int playerHp = 100;
   int enemyHp = 100;
-
   final int playerMaxHp = 100;
   final int enemyMaxHp = 100;
 
-  // ➤ Matemática
+  // Matemática
   late int a;
-  late int result;
   late int answer;
+  late int result;
   List<int> options = [];
   String symbol = "+";
 
-  // ➤ Estado do mago
+  // Estado
   WizardState wizardState = WizardState.idle;
   String feedbackMessage = "";
 
@@ -43,7 +43,7 @@ class _GameScreenState extends State<GameScreen> {
     _generateQuestion();
   }
 
-  // Escolhe símbolo com base no reino
+  // Escolhe o símbolo conforme o reino
   String _getOperationSymbol(MathOperation op) {
     switch (op) {
       case MathOperation.addition:
@@ -57,13 +57,27 @@ class _GameScreenState extends State<GameScreen> {
     }
   }
 
-  // Gera a pergunta
+  // Gera pergunta baseada na dificuldade
   void _generateQuestion() {
     final rand = Random();
 
-    a = rand.nextInt(9) + 1;
-    answer = rand.nextInt(9) + 1;
+    int rangeMax;
+    switch (widget.difficulty) {
+      case "Fácil":
+        rangeMax = 9;
+        break;
+      case "Médio":
+        rangeMax = 20;
+        break;
+      case "Difícil":
+        rangeMax = 50;
+        break;
+      default:
+        rangeMax = 9;
+    }
 
+    a = rand.nextInt(rangeMax) + 1;
+    answer = rand.nextInt(rangeMax) + 1;
     symbol = _getOperationSymbol(widget.realm.operation);
 
     switch (symbol) {
@@ -80,7 +94,7 @@ class _GameScreenState extends State<GameScreen> {
 
     options = [answer];
     while (options.length < 3) {
-      int opt = rand.nextInt(9) + 1;
+      int opt = rand.nextInt(rangeMax) + 1;
       if (!options.contains(opt)) options.add(opt);
     }
     options.shuffle();
@@ -88,7 +102,7 @@ class _GameScreenState extends State<GameScreen> {
     feedbackMessage = "";
   }
 
-  // ➤ Barras de vida
+  // Barra de HP
   Widget _buildHpBar(int current, int max, Color color) {
     double pct = current / max;
 
@@ -124,7 +138,7 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
-  // ➤ Dano
+  // Dano
   void _dealDamageToEnemy(int dmg) {
     setState(() {
       enemyHp -= dmg;
@@ -139,7 +153,7 @@ class _GameScreenState extends State<GameScreen> {
     });
   }
 
-  // ➤ Checar resposta
+  // Verifica resposta
   void _checkAnswer(int selected) {
     final acerto = selected == answer;
 
@@ -155,7 +169,7 @@ class _GameScreenState extends State<GameScreen> {
       }
     });
 
-    Future.delayed(const Duration(milliseconds: 800), () {
+    Future.delayed(const Duration(milliseconds: 900), () {
       if (!mounted) return;
 
       if (playerHp == 0 || enemyHp == 0) {
@@ -170,123 +184,101 @@ class _GameScreenState extends State<GameScreen> {
     });
   }
 
-  // ➤ Diálogo final aprimorado e centralizado
-  void _showEndDialog() {
+  // Diálogo final
+  void _showEndDialog() async {
     bool venceu = enemyHp == 0;
+
+    if (venceu) {
+      await ProgressDB.instance.insertProgress(
+        widget.realm.name,
+        widget.difficulty,
+        true,
+      );
+    }
 
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => Center(
-        // 🔹 Centraliza verticalmente
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 320),
-          child: AlertDialog(
-            backgroundColor: Colors.deepPurple.shade900.withOpacity(0.9),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(24),
-            ),
-            title: Center(
-              child: Text(
-                venceu ? "🏆 Vitória!" : "💀 Derrota!",
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontFamily: 'MedievalSharp',
-                  fontWeight: FontWeight.bold,
-                  fontSize: 26,
-                ),
-              ),
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 20,
-              vertical: 18,
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
+      builder: (_) => AlertDialog(
+        backgroundColor: Colors.deepPurple[800],
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        title: Text(
+          venceu ? "🏆 Vitória!" : "💀 Derrota!",
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 24,
+            fontFamily: 'MedievalSharp',
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Text(
+          venceu
+              ? "Você derrotou o inimigo e conquistou esta fase!"
+              : "O mago ficou sem energia!",
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: Colors.white70, fontSize: 16),
+        ),
+        actionsAlignment: MainAxisAlignment.center,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: Column(
               children: [
-                Text(
-                  venceu
-                      ? "Você derrotou o inimigo e conquistou este reino!"
-                      : "O mago ficou sem energia... tente novamente!",
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 17,
-                    height: 1.5,
-                    fontFamily: 'Poppins',
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.pinkAccent,
+                    minimumSize: const Size(200, 48),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    setState(() {
+                      playerHp = playerMaxHp;
+                      enemyHp = enemyMaxHp;
+                      wizardState = WizardState.idle;
+                      _generateQuestion();
+                    });
+                  },
+                  child: const Text(
+                    "Jogar Novamente",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-                const SizedBox(height: 28),
-
-                // 🔹 Botões centralizados
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.pinkAccent,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 36,
-                          vertical: 14,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                      ),
-                      onPressed: () {
-                        Navigator.pop(context);
-                        setState(() {
-                          playerHp = playerMaxHp;
-                          enemyHp = enemyMaxHp;
-                          wizardState = WizardState.idle;
-                          _generateQuestion();
-                        });
-                      },
-                      child: const Text(
-                        "Jogar Novamente",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
+                const SizedBox(height: 8),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepPurple[300],
+                    minimumSize: const Size(200, 48),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    const SizedBox(height: 14),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.deepPurpleAccent,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 36,
-                          vertical: 14,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                      ),
-                      onPressed: () {
-                        Navigator.pop(context); // fecha o diálogo
-                        Navigator.pop(context); // volta para RealmsScreen
-                      },
-                      child: const Text(
-                        "Voltar aos Reinos",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
+                  ),
+                  onPressed: () {
+                    Navigator.popUntil(context, (route) => route.isFirst);
+                  },
+                  child: const Text(
+                    "Voltar aos Reinos",
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontWeight: FontWeight.bold,
                     ),
-                  ],
+                  ),
                 ),
               ],
             ),
           ),
-        ),
+        ],
       ),
     );
   }
 
-  // ➤ Escolher animação
+  // Escolhe animação do mago
   Widget _buildWizard() {
     switch (wizardState) {
       case WizardState.attack:
@@ -298,16 +290,14 @@ class _GameScreenState extends State<GameScreen> {
     }
   }
 
+  // ✅ Método build OBRIGATÓRIO
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "Derrote seu inimigo!",
-          style: TextStyle(
-            fontFamily: 'MedievalSharp',
-            fontWeight: FontWeight.bold,
-          ),
+        title: Text(
+          "Derrote seu inimigo (${widget.difficulty})",
+          style: const TextStyle(color: Colors.white),
         ),
         backgroundColor: const Color(0xFF4527A0),
         foregroundColor: Colors.white,
@@ -315,34 +305,32 @@ class _GameScreenState extends State<GameScreen> {
       ),
       body: Stack(
         children: [
-          // 🔥 Fundo dinâmico
           Positioned.fill(
             child: Image.asset(widget.realm.image, fit: BoxFit.cover),
           ),
-
-          // Escurecer fundo
           Positioned.fill(
             child: Container(color: Colors.black.withOpacity(0.35)),
           ),
-
           SafeArea(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const SizedBox(height: 20),
 
-                // 🟥 INIMIGO + HP
+                // Inimigo + HP
                 Column(
                   children: [
                     _buildHpBar(enemyHp, enemyMaxHp, Colors.redAccent),
                     const SizedBox(height: 12),
-
                     Container(
                       width: 120,
                       height: 120,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: widget.realm.color, width: 4),
+                        border: Border.all(
+                          color: widget.realm.color.withOpacity(0.8),
+                          width: 4,
+                        ),
                         gradient: LinearGradient(
                           colors: [
                             widget.realm.color.withOpacity(0.8),
@@ -358,7 +346,6 @@ class _GameScreenState extends State<GameScreen> {
                         ],
                       ),
                     ),
-
                     const SizedBox(height: 20),
                     Text(
                       "$a $symbol ? = $result",
@@ -371,7 +358,7 @@ class _GameScreenState extends State<GameScreen> {
                   ],
                 ),
 
-                // ✨ FEEDBACK
+                // Feedback
                 AnimatedOpacity(
                   duration: const Duration(milliseconds: 300),
                   opacity: feedbackMessage.isEmpty ? 0 : 1,
@@ -385,7 +372,7 @@ class _GameScreenState extends State<GameScreen> {
                   ),
                 ),
 
-                // 🟢 FEITIÇOS
+                // Feitiços
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: options.map((opt) {
@@ -409,7 +396,7 @@ class _GameScreenState extends State<GameScreen> {
                   }).toList(),
                 ),
 
-                // ❤️ HP DO MAGO + SPRITE
+                // HP do jogador + mago
                 Column(
                   children: [
                     _buildHpBar(playerHp, playerMaxHp, Colors.greenAccent),

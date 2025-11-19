@@ -1,11 +1,11 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
-class ProgressDatabase {
-  static final ProgressDatabase instance = ProgressDatabase._init();
+class ProgressDB {
+  static final ProgressDB instance = ProgressDB._init();
   static Database? _database;
 
-  ProgressDatabase._init();
+  ProgressDB._init();
 
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -20,24 +20,40 @@ class ProgressDatabase {
     return await openDatabase(path, version: 1, onCreate: _createDB);
   }
 
-  Future _createDB(Database db, int version) async {
+  Future<void> _createDB(Database db, int version) async {
     await db.execute('''
       CREATE TABLE progress (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         realm TEXT NOT NULL,
-        score INTEGER NOT NULL,
-        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        difficulty TEXT NOT NULL,
+        completed INTEGER NOT NULL
       )
     ''');
   }
 
-  Future<void> insertProgress(String realm, int score) async {
+  Future<void> insertProgress(
+    String realm,
+    String difficulty,
+    bool completed,
+  ) async {
     final db = await instance.database;
-    await db.insert('progress', {'realm': realm, 'score': score});
+    await db.insert('progress', {
+      'realm': realm,
+      'difficulty': difficulty,
+      'completed': completed ? 1 : 0,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
-  Future<List<Map<String, dynamic>>> getProgress() async {
+  Future<bool> isCompleted(String realm, String difficulty) async {
     final db = await instance.database;
-    return db.query('progress', orderBy: 'id DESC');
+    final result = await db.query(
+      'progress',
+      where: 'realm = ? AND difficulty = ?',
+      whereArgs: [realm, difficulty],
+    );
+    if (result.isNotEmpty) {
+      return result.first['completed'] == 1;
+    }
+    return false;
   }
 }
